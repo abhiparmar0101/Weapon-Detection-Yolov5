@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <title>Webcam</title>
+    <style>
+      .corner {
+        border-radius: 25px;
+        border: 5px solid #212aad;
+        padding: 0px;
+        width:60%;
+        height:auto;
+        text-align: center;
+      }
+
+      .video-container {
+        justify-content: center;
+        text-align: center;
+        height:100%;
+        /*border: 1px solid black;*/
+      }
+      .container{
+        text-align: center;
+        width: 100%;
+
+      }
+    </style>
+  </head>
+  
+  <body >
+      <div class="container">
+        <div class="row">
+          <img src="../static/weaponimage.png" style="width:70px; margin-top: 2%;">
+            <h1 style="margin-left: 15%;">Weapton Detection using Webcam </h1>
+          </img>
+        </div>
+      </div>
+  
+      <div class="video-container">
+          <img src="{{ url_for('webcam_video_feed') }}" class="corner"></img>
+          <!--<img src="../static/pytorch.png" class="corner"></img>-->
+          <!--<img src="{{ url_for('video') }}" width="50%"/>-->
+      </div>
+    </body>
+</html>
+{% endblock %}
