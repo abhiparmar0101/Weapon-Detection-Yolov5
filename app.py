@@ -12,7 +12,8 @@ import numpy as np
 
 import torch
 from io import BytesIO
-
+from unicodedata import name
+from PIL import Image, ImageDraw, ImageFont
 DEVELOPMENT_ENV  = True
 
 app = Flask(__name__)
@@ -31,13 +32,35 @@ app_data = {
 @app.route('/')
 def index():
     return render_template('index.html', app_data=app_data)
+# font
+font = cv2.FONT_HERSHEY_SIMPLEX
+  
+# org
+org = (100, 100)
+  
+# fontScale
+fontScale = 1
+   
+# Blue color in BGR
+color = (0, 0, 255)
+  
+# Line thickness of 2 px
+thickness = 4
 
-
+def cv2ImgAddText(img, text, left, top, textColor=(0, 255, 0), textSize=20):
+    if (isinstance(img, np.ndarray)): 
+        img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    draw = ImageDraw.Draw(img)
+    fontText = ImageFont.truetype(
+        "msjhbd.ttc", textSize, encoding="utf-8")
+    draw.text((left, top), text, textColor, font=fontText)
+    return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
 def gen():
     # Load Custom Model
     # model = torch.hub.load("ultralytics/yolov5", "custom", path = "Weaponmodel/weapon.pt", force_reload=True)
 
     
+    name = []
     # model.eval()
     model.conf = 0.6  # confidence threshold (0-1)
     model.iou = 0.45  # NMS IoU threshold (0-1) 
@@ -57,36 +80,26 @@ def gen():
             img = Image.open(io.BytesIO(frame))
             results = model(img, size=640)
             #print(results)
-            #print(results.pandas().xyxy[0])
+            df = results.pandas().xyxy[0]
             #results.render()  # updates results.imgs with boxes and labels
-            results.print()  # print results to screen
-            #results.show() 
-            #print(results.imgs)
-            #print(type(img))
-            #print(results)
-            #plt.imshow(np.squeeze(results.render()))
-            #print(type(img))
-            #print(img.mode)
+            #results.print()  # print results to screen
+            # count = 0
+            
+            df=df[df['name']=='pistol'].loc[:,['name']].count()
+            
+            # print(df)
+            for name in df:
+              
+                print(name)
             
             #convert remove single-dimensional entries from the shape of an array
             img = np.squeeze(results.render()) #RGB
             # read image as BGR
             img_BGR = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) #BGR
 
-            #print(type(img))
-            #print(img.shape)
-            #frame = img
-            #ret,buffer=cv2.imencode('.jpg',img)
-            #frame=buffer.tobytes()
-            #print(type(frame))
-            #for img in results.imgs:
-                #img = Image.fromarray(img)
-            #ret,img=cv2.imencode('.jpg',img)
-            #img=img.tobytes()
-
-            #encode output image to bytes
-            #img = cv2.imencode('.jpg', img)[1].tobytes()
-            #print(type(img))
+            #for counting
+            img_BGR=cv2ImgAddText(img_BGR, f'Weapon Detected: {name}', 10, 10, (255, 0, 0), 40)
+            
         else:
             break
         #print(cv2.imencode('.jpg', img)[1])
@@ -126,9 +139,26 @@ def genvideo():
             frame=buffer.tobytes()
             img = Image.open(io.BytesIO(frame))
             results = modelvideo(img, size=640)
+            df = results.pandas().xyxy[0]
+            df1 = results.pandas().xyxy[0]
+            df=df[df['name']=='pistol'].loc[:,['name']].count()
+            df1=df1[df1['name']=='machine_gun'].loc[:,['name']].count()
+            for name in df:
+              
+                print(name)
+            for name1 in df1:
+              
+                print(name1)
+             
             results.print()  
             img = np.squeeze(results.render()) 
-            img_BGR = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) 
+            img_BGR = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            # img_BGR=cv2ImgAddText(img_BGR, f'Weapon Detected: {name}', 10, 10, (255, 0, 0), 40)
+            
+            img_BGR=cv2ImgAddText(img_BGR, f'Machine Gun Detected: {name1}', 10, 10, (255, 0, 0), 40) 
+            img_BGR = cv2.putText(img_BGR, f'Pistol Detected: {name}', org, font, 
+                   fontScale, color, thickness,cv2.LINE_AA, False )
+            #img_BGR = cv2.putText(img_BGR, f'Machine Gun: {name1}', org, font, fontScale, color, thickness, cv2.LINE_AA, False)
         else:
             break
         frame = cv2.imencode('.jpg', img_BGR)[1].tobytes()
