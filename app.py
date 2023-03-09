@@ -131,7 +131,7 @@ def genvideo():
     modelvideo.eval()
     modelvideo.conf = 0.5  
     modelvideo.iou = 0.45 
-    cap=cv2.VideoCapture('wd1.mp4')
+    cap=cv2.VideoCapture('wd2.mp4')
     while(cap.isOpened()):
         success, frame = cap.read()
         if success == True:
